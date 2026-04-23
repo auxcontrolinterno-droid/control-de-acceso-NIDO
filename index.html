@@ -44,6 +44,7 @@ border-radius:12px;
 color:white;
 cursor:pointer;
 margin-top:10px;
+font-weight:700;
 }
 
 .ingreso{ background:#0b3d91; }
@@ -96,17 +97,18 @@ font-weight:600;
 
 </div>
 
-<button class="btn ingreso hidden" id="btnIngreso" onclick="enviarIngreso()">INGRESO</button>
-<button class="btn salida hidden" id="btnSalida" onclick="enviarSalida()">SALIDA</button>
+<button class="btn ingreso hidden" id="btnIngreso" onclick="enviar(true)">INGRESO</button>
+<button class="btn salida hidden" id="btnSalida" onclick="enviar(false)">SALIDA</button>
 
 </div>
 
 <script>
 
-/* 🔥 URL CORREGIDA (IMPORTANTE: /exec) */
-const URL = "https://script.google.com/macros/s/AKfycby85sS5KDcft0wkf82n_jr3RPRMDRNR7-RRd3vb6ouF/exec";
+const URL = "https://script.google.com/macros/s/AKfycbxgDKfHUw-FGGefz98GUIYJJzeYgi6Vf6objs_SKt2bREY2cnDmiQFmt4AiZMeFf-QS/exec";
 
-/* ========================= */
+/* =========================
+   MOSTRAR CAMPOS
+========================= */
 function mostrarCampos(){
 
 const rol = document.getElementById("rol").value;
@@ -133,8 +135,10 @@ btnSalida.classList.add("hidden");
 
 }
 
-/* ========================= */
-function datos(){
+/* =========================
+   OBTENER DATOS
+========================= */
+function getData(){
 return {
 rol: document.getElementById("rol").value,
 nombre: document.getElementById("nombre").value,
@@ -148,63 +152,47 @@ destino: document.getElementById("destino").value
 };
 }
 
-/* ========================= */
-async function enviarIngreso(){
+/* =========================
+   ENVIAR (INGRESO O SALIDA)
+========================= */
+async function enviar(esIngreso){
 
-const d = datos();
+const data = getData();
+
+if(!data.nombre || !data.documento){
+alert("Complete los campos obligatorios");
+return;
+}
 
 try{
 
-const res = await fetch(URL,{
+await fetch(URL,{
 method:"POST",
+mode:"no-cors",
 headers:{
 "Content-Type":"application/json"
 },
-body: JSON.stringify(d)
+body: JSON.stringify(data)
 });
 
-const txt = await res.text();
-console.log("respuesta:", txt);
-
+if(esIngreso){
 alert("Ingreso registrado correctamente");
-
-}catch(err){
-console.error(err);
-alert("Error enviando datos");
-}
-
-limpiar();
-}
-
-/* ========================= */
-async function enviarSalida(){
-
-const d = datos();
-
-try{
-
-const res = await fetch(URL,{
-method:"POST",
-headers:{
-"Content-Type":"application/json"
-},
-body: JSON.stringify(d)
-});
-
-const txt = await res.text();
-console.log("respuesta:", txt);
-
+}else{
 alert("Salida registrada correctamente");
-
-}catch(err){
-console.error(err);
-alert("Error enviando datos");
 }
 
 limpiar();
+
+}catch(err){
+alert("Error enviando datos");
+console.log(err);
 }
 
-/* ========================= */
+}
+
+/* =========================
+   LIMPIAR
+========================= */
 function limpiar(){
 
 document.querySelectorAll("input").forEach(i=>i.value="");
