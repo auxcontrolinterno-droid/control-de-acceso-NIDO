@@ -161,46 +161,31 @@ async function enviarIngreso(){
 
 const d = datos();
 
-if(!d.documento || !d.nombre){
-alert("Complete los campos");
-return;
-}
-
-await fetch(SCRIPT_URL,{
+await fetch(URL,{
 method:"POST",
-body:JSON.stringify({
-tipoRegistro:"INGRESO",
-...d
-})
+headers:{
+  "Content-Type":"application/json"
+},
+body: JSON.stringify(d)
 });
 
-document.getElementById("mensaje").innerText =
-"✅ Ingreso registrado correctamente";
-
-limpiar();
-
+alert("Ingreso registrado");
 }
-
 /* SALIDA */
 async function enviarSalida(){
 
 const d = datos();
 
-if(!d.documento){
-alert("Complete los campos");
-return;
-}
-
-await fetch(SCRIPT_URL,{
+await fetch(URL,{
 method:"POST",
-body:JSON.stringify({
-tipoRegistro:"SALIDA",
-...d
-})
+headers:{
+  "Content-Type":"application/json"
+},
+body: JSON.stringify(d)
 });
 
-document.getElementById("mensaje").innerText =
-"✅ Salida registrada correctamente";
+alert("Salida registrada");
+}
 
 limpiar();
 
