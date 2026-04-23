@@ -3,61 +3,50 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Control de Acceso NIDO</title>
+<title>Control NIDO</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
 <style>
 body{
-font-family:'Inter',sans-serif;
-background:linear-gradient(135deg,#e9eef5,#dfe7f1);
-margin:0;
+font-family:Inter;
+background:#eef2f8;
 text-align:center;
+margin:0;
 }
 
 .container{
-background:white;
-width:90%;
 max-width:420px;
 margin:25px auto;
+background:#fff;
 padding:20px;
-border-radius:18px;
+border-radius:16px;
 box-shadow:0 10px 25px rgba(0,0,0,.08);
 }
-
-h2{ color:#0b3d91; }
 
 input,select{
 width:90%;
 padding:12px;
 margin:6px 0;
-border-radius:10px;
 border:1px solid #ccc;
-outline:none;
+border-radius:10px;
 }
 
-.btn{
+button{
 width:100%;
 padding:13px;
-border:none;
-border-radius:12px;
-color:white;
-cursor:pointer;
 margin-top:10px;
-font-weight:700;
+border:none;
+border-radius:10px;
+color:#fff;
+font-weight:bold;
+cursor:pointer;
 }
 
-.ingreso{ background:#0b3d91; }
-.salida{ background:#c62828; }
+.ingreso{background:#0b3d91;}
+.salida{background:#c62828;}
 
-.hidden{ display:none; }
-
-#mensaje{
-font-size:13px;
-margin:10px 0;
-color:#444;
-font-weight:600;
-}
+.hidden{display:none;}
 </style>
 </head>
 
@@ -65,12 +54,10 @@ font-weight:600;
 
 <div class="container">
 
-<h2>Control de Acceso NIDO</h2>
+<h2>Control NIDO</h2>
 
-<div id="mensaje">Seleccione su rol</div>
-
-<select id="rol" onchange="mostrarCampos()">
-<option value="">Seleccione rol</option>
+<select id="rol" onchange="mostrar()">
+<option value="">Rol</option>
 <option value="VISITANTE">VISITANTE</option>
 <option value="CONTRATISTA">CONTRATISTA</option>
 <option value="PROVEEDOR">PROVEEDOR</option>
@@ -78,27 +65,19 @@ font-weight:600;
 
 <div id="form" class="hidden">
 
-<input id="nombre" placeholder="Nombre completo">
-
-<select id="tipoDoc">
-<option value="">Tipo documento</option>
-<option value="CC">Cédula</option>
-<option value="TI">Tarjeta identidad</option>
-<option value="CE">Extranjería</option>
-<option value="PA">Pasaporte</option>
-</select>
-
-<input id="documento" placeholder="Número de documento">
+<input id="nombre" placeholder="Nombre">
+<input id="tipoDoc" placeholder="Tipo doc">
+<input id="documento" placeholder="Documento">
 <input id="celular" placeholder="Celular">
-<input id="entidad" placeholder="Entidad a la que pertenece">
+<input id="entidad" placeholder="Entidad">
 <input id="contacto" placeholder="Contacto emergencia">
 <input id="parentesco" placeholder="Parentesco">
-<input id="destino" placeholder="Lugar de destino">
+<input id="destino" placeholder="Destino">
 
 </div>
 
-<button class="btn ingreso hidden" id="btnIngreso" onclick="enviar(true)">INGRESO</button>
-<button class="btn salida hidden" id="btnSalida" onclick="enviar(false)">SALIDA</button>
+<button class="ingreso hidden" id="btnIn" onclick="enviar('INGRESO')">INGRESO</button>
+<button class="salida hidden" id="btnOut" onclick="enviar('SALIDA')">SALIDA</button>
 
 </div>
 
@@ -106,40 +85,25 @@ font-weight:600;
 
 const URL = "https://script.google.com/macros/s/AKfycbxgDKfHUw-FGGefz98GUIYJJzeYgi6Vf6objs_SKt2bREY2cnDmiQFmt4AiZMeFf-QS/exec";
 
-/* =========================
-   MOSTRAR CAMPOS
-========================= */
-function mostrarCampos(){
+function mostrar(){
 
 const rol = document.getElementById("rol").value;
 
-const form = document.getElementById("form");
-const btnIngreso = document.getElementById("btnIngreso");
-const btnSalida = document.getElementById("btnSalida");
-
-if(!rol){
-form.classList.add("hidden");
-btnIngreso.classList.add("hidden");
-btnSalida.classList.add("hidden");
-return;
-}
-
-form.classList.remove("hidden");
-btnIngreso.classList.remove("hidden");
+document.getElementById("form").classList.toggle("hidden", !rol);
+document.getElementById("btnIn").classList.toggle("hidden", !rol);
 
 if(rol === "CONTRATISTA" || rol === "PROVEEDOR"){
-btnSalida.classList.remove("hidden");
+document.getElementById("btnOut").classList.remove("hidden");
 }else{
-btnSalida.classList.add("hidden");
+document.getElementById("btnOut").classList.add("hidden");
 }
 
 }
 
-/* =========================
-   OBTENER DATOS
-========================= */
-function getData(){
-return {
+function enviar(tipo){
+
+const data = {
+tipo: tipo,
 rol: document.getElementById("rol").value,
 nombre: document.getElementById("nombre").value,
 tipoDoc: document.getElementById("tipoDoc").value,
@@ -150,58 +114,28 @@ contactoEmergencia: document.getElementById("contacto").value,
 parentesco: document.getElementById("parentesco").value,
 destino: document.getElementById("destino").value
 };
-}
 
-/* =========================
-   ENVIAR (INGRESO O SALIDA)
-========================= */
-async function enviar(esIngreso){
+// 🔥 ENVÍO SIMPLE (SIN CORS PROBLEMS)
+const params = new URLSearchParams(data).toString();
 
-const data = getData();
-
-if(!data.nombre || !data.documento){
-alert("Complete los campos obligatorios");
-return;
-}
-
-try{
-
-await fetch(URL,{
-method:"POST",
-mode:"no-cors",
-headers:{
-"Content-Type":"application/json"
-},
-body: JSON.stringify(data)
+fetch(URL + "?" + params)
+.then(() => {
+alert(tipo + " registrado");
+limpiar();
+})
+.catch(err => {
+alert("Error al enviar");
+console.log(err);
 });
 
-if(esIngreso){
-alert("Ingreso registrado correctamente");
-}else{
-alert("Salida registrada correctamente");
 }
 
-limpiar();
-
-}catch(err){
-alert("Error enviando datos");
-console.log(err);
-}
-
-}
-
-/* =========================
-   LIMPIAR
-========================= */
 function limpiar(){
-
 document.querySelectorAll("input").forEach(i=>i.value="");
-document.getElementById("tipoDoc").value="";
 document.getElementById("rol").value="";
 document.getElementById("form").classList.add("hidden");
-document.getElementById("btnIngreso").classList.add("hidden");
-document.getElementById("btnSalida").classList.add("hidden");
-
+document.getElementById("btnIn").classList.add("hidden");
+document.getElementById("btnOut").classList.add("hidden");
 }
 
 </script>
