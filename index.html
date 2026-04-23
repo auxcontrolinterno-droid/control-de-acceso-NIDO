@@ -103,11 +103,10 @@ font-weight:600;
 
 <script>
 
-const URL = "https://script.google.com/macros/s/AKfycby85sS5KDcft0wkf82n_jr3RPRMDRNR7-RRd3vb6ouF/dev";
+/* 🔥 URL CORREGIDA (IMPORTANTE: /exec) */
+const URL = "https://script.google.com/macros/s/AKfycby85sS5KDcft0wkf82n_jr3RPRMDRNR7-RRd3vb6ouF/exec";
 
-/* =========================
-   MOSTRAR CAMPOS CORREGIDO
-========================= */
+/* ========================= */
 function mostrarCampos(){
 
 const rol = document.getElementById("rol").value;
@@ -123,13 +122,9 @@ btnSalida.classList.add("hidden");
 return;
 }
 
-// mostrar formulario
 form.classList.remove("hidden");
-
-// siempre ingreso
 btnIngreso.classList.remove("hidden");
 
-// salida solo ciertos roles
 if(rol === "CONTRATISTA" || rol === "PROVEEDOR"){
 btnSalida.classList.remove("hidden");
 }else{
@@ -138,9 +133,7 @@ btnSalida.classList.add("hidden");
 
 }
 
-/* =========================
-   DATOS
-========================= */
+/* ========================= */
 function datos(){
 return {
 rol: document.getElementById("rol").value,
@@ -155,14 +148,13 @@ destino: document.getElementById("destino").value
 };
 }
 
-/* =========================
-   INGRESO
-========================= */
+/* ========================= */
 async function enviarIngreso(){
 
 const d = datos();
 
 try{
+
 const res = await fetch(URL,{
 method:"POST",
 headers:{
@@ -172,25 +164,25 @@ body: JSON.stringify(d)
 });
 
 const txt = await res.text();
-console.log(txt);
+console.log("respuesta:", txt);
 
-alert("Ingreso registrado");
+alert("Ingreso registrado correctamente");
 
 }catch(err){
-alert("Error enviando datos");
 console.error(err);
+alert("Error enviando datos");
 }
 
 limpiar();
 }
-/* =========================
-   SALIDA
-========================= */
+
+/* ========================= */
 async function enviarSalida(){
 
 const d = datos();
 
 try{
+
 const res = await fetch(URL,{
 method:"POST",
 headers:{
@@ -200,21 +192,19 @@ body: JSON.stringify(d)
 });
 
 const txt = await res.text();
-console.log(txt);
+console.log("respuesta:", txt);
 
-alert("Salida registrada");
+alert("Salida registrada correctamente");
 
 }catch(err){
-alert("Error enviando datos");
 console.error(err);
+alert("Error enviando datos");
 }
 
 limpiar();
 }
 
-/* =========================
-   LIMPIAR
-========================= */
+/* ========================= */
 function limpiar(){
 
 document.querySelectorAll("input").forEach(i=>i.value="");
