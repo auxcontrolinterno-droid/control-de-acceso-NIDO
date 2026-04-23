@@ -1,9 +1,9 @@
 <!DOCTYPE html>
-<html>
+<html lang="es">
 <head>
 <meta charset="UTF-8">
-<title>Control de Acceso</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Control de Acceso NIDO</title>
 
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
 
@@ -19,7 +19,6 @@ text-align:center;
 background:white;
 padding:10px 0;
 border-bottom:2px solid #0b3d91;
-box-shadow:0 2px 6px rgba(0,0,0,.05);
 }
 
 .header img{
@@ -30,23 +29,25 @@ max-width:200px;
 .container{
 background:white;
 width:90%;
-max-width:380px;
-margin:30px auto;
-padding:25px;
+max-width:420px;
+margin:25px auto;
+padding:20px;
 border-radius:18px;
 box-shadow:0 10px 25px rgba(0,0,0,.08);
 }
 
 h2{
 color:#0b3d91;
+margin-bottom:10px;
 }
 
 input,select{
-width:85%;
+width:90%;
 padding:12px;
-margin:8px 0;
+margin:6px 0;
 border-radius:10px;
 border:1px solid #ccc;
+outline:none;
 }
 
 .btn{
@@ -65,10 +66,11 @@ margin-top:10px;
 
 .hidden{ display:none; }
 
-.mensaje{
+#mensaje{
 font-size:13px;
 margin:10px 0;
 color:#444;
+font-weight:600;
 }
 </style>
 </head>
@@ -81,31 +83,39 @@ color:#444;
 
 <div class="container">
 
-<h2>Control de Acceso</h2>
+<h2>Control de Acceso NIDO</h2>
 
-<div class="mensaje" id="mensaje">Registre su ingreso/salida</div>
+<div id="mensaje">Complete los datos</div>
 
-<select id="rolSelect" onchange="cambiarVista()">
-<option value="">Defina su rol</option>
+<select id="rol" onchange="mostrarCampos()">
+<option value="">Seleccione rol</option>
 <option value="VISITANTE">VISITANTE</option>
 <option value="CONTRATISTA">CONTRATISTA</option>
 <option value="PROVEEDOR">PROVEEDOR</option>
 </select>
 
-<div id="zonaCedula" class="hidden">
-<select id="tipoDocInput">
-<option value="">Tipo de documento</option>
+<div id="formulario" class="hidden">
+
+<select id="tipoDoc">
+<option value="">Tipo documento</option>
 <option value="CC">Cédula</option>
-<option value="TI">Tarjeta Identidad</option>
+<option value="TI">Tarjeta identidad</option>
 <option value="CE">Extranjería</option>
 <option value="PA">Pasaporte</option>
 </select>
 
-<input id="docInput" placeholder="Número documento">
+<input id="documento" placeholder="Documento">
+<input id="nombre" placeholder="Nombre completo">
+<input id="celular" placeholder="Celular">
+<input id="entidad" placeholder="Entidad">
+<input id="contacto" placeholder="Contacto emergencia">
+<input id="parentesco" placeholder="Parentesco">
+<input id="destino" placeholder="Lugar de destino">
+
 </div>
 
-<button class="btn ingreso hidden" id="btnIngreso" onclick="irIngreso()">Ingreso</button>
-<button class="btn salida hidden" id="btnSalida" onclick="irSalida()">Salida</button>
+<button class="btn ingreso hidden" id="btnIngreso" onclick="enviarIngreso()">INGRESO</button>
+<button class="btn salida hidden" id="btnSalida" onclick="enviarSalida()">SALIDA</button>
 
 </div>
 
@@ -113,15 +123,13 @@ color:#444;
 
 const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby85sS5KDcft0wkf82n_jr3RPRMDRNR7-RRd3vb6ouF/dev";
 
-let data = [];
+/* MOSTRAR CAMPOS */
+function mostrarCampos(){
 
-/* UI */
-function cambiarVista(){
-
-document.getElementById("zonaCedula").classList.remove("hidden");
+document.getElementById("formulario").classList.remove("hidden");
 document.getElementById("btnIngreso").classList.remove("hidden");
 
-const rol = document.getElementById("rolSelect").value;
+const rol = document.getElementById("rol").value;
 
 if(rol === "CONTRATISTA" || rol === "PROVEEDOR"){
 document.getElementById("btnSalida").classList.remove("hidden");
@@ -131,86 +139,82 @@ document.getElementById("btnSalida").classList.add("hidden");
 
 }
 
-/* USUARIO (simple local) */
-function getUser(){
+/* OBTENER DATOS */
+function datos(){
+
 return {
-nombre: "",
-contacto: "",
-entidad: "",
-emergencia: "",
-parentesco: "",
-rol: document.getElementById("rolSelect").value
+rol: document.getElementById("rol").value,
+tipoDoc: document.getElementById("tipoDoc").value,
+documento: document.getElementById("documento").value,
+nombre: document.getElementById("nombre").value,
+celular: document.getElementById("celular").value,
+entidad: document.getElementById("entidad").value,
+contactoEmergencia: document.getElementById("contacto").value,
+parentesco: document.getElementById("parentesco").value,
+destino: document.getElementById("destino").value
 };
+
 }
 
 /* INGRESO */
-async function irIngreso(){
+async function enviarIngreso(){
 
-const doc = document.getElementById("docInput").value.trim();
-const rol = document.getElementById("rolSelect").value;
-const tipoDoc = document.getElementById("tipoDocInput").value;
+const d = datos();
 
-if(!doc || !rol || !tipoDoc){
-alert("Complete todos los campos");
+if(!d.documento || !d.nombre){
+alert("Complete los campos");
 return;
 }
 
-await fetch(SCRIPT_URL, {
-method: "POST",
-body: JSON.stringify({
-tipoRegistro: "INGRESO",
-rol: rol,
-nombre: "",
-tipoDoc: tipoDoc,
-documento: doc,
-celular: "",
-entidad: "",
-contactoEmergencia: "",
-parentesco: "",
-destino: "INGRESO"
+await fetch(SCRIPT_URL,{
+method:"POST",
+body:JSON.stringify({
+tipoRegistro:"INGRESO",
+...d
 })
 });
 
 document.getElementById("mensaje").innerText =
 "✅ Ingreso registrado correctamente";
 
-document.getElementById("docInput").value = "";
+limpiar();
 
 }
 
 /* SALIDA */
-async function irSalida(){
+async function enviarSalida(){
 
-const doc = document.getElementById("docInput").value.trim();
-const tipoDoc = document.getElementById("tipoDocInput").value;
-const rol = document.getElementById("rolSelect").value;
+const d = datos();
 
-if(!doc || !tipoDoc){
+if(!d.documento){
 alert("Complete los campos");
 return;
 }
 
-await fetch(SCRIPT_URL, {
-method: "POST",
-body: JSON.stringify({
-tipoRegistro: "SALIDA",
-rol: rol,
-nombre: "",
-tipoDoc: tipoDoc,
-documento: doc,
-celular: "",
-entidad: "",
-contactoEmergencia: "",
-parentesco: "",
-destino: "SALIDA"
+await fetch(SCRIPT_URL,{
+method:"POST",
+body:JSON.stringify({
+tipoRegistro:"SALIDA",
+...d
 })
 });
 
 document.getElementById("mensaje").innerText =
 "✅ Salida registrada correctamente";
 
-document.getElementById("docInput").value = "";
-document.getElementById("tipoDocInput").value = "";
+limpiar();
+
+}
+
+/* LIMPIAR */
+function limpiar(){
+
+document.querySelectorAll("input").forEach(i=>i.value="");
+document.getElementById("tipoDoc").value="";
+document.getElementById("rol").value="";
+document.getElementById("formulario").classList.add("hidden");
+document.getElementById("btnIngreso").classList.add("hidden");
+document.getElementById("btnSalida").classList.add("hidden");
 
 }
 
