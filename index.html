@@ -160,35 +160,56 @@ destino: document.getElementById("destino").value
 ========================= */
 async function enviarIngreso(){
 
-await fetch(URL,{
+const d = datos();
+
+try{
+const res = await fetch(URL,{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
 },
-body:JSON.stringify(datos())
+body: JSON.stringify(d)
 });
 
-alert("Ingreso registrado");
-limpiar();
+const txt = await res.text();
+console.log(txt);
 
+alert("Ingreso registrado");
+
+}catch(err){
+alert("Error enviando datos");
+console.error(err);
 }
 
+limpiar();
+}
 /* =========================
    SALIDA
 ========================= */
 async function enviarSalida(){
 
-await fetch(URL,{
+const d = datos();
+
+try{
+const res = await fetch(URL,{
 method:"POST",
 headers:{
 "Content-Type":"application/json"
 },
-body:JSON.stringify(datos())
+body: JSON.stringify(d)
 });
 
-alert("Salida registrada");
-limpiar();
+const txt = await res.text();
+console.log(txt);
 
+alert("Salida registrada");
+
+}catch(err){
+alert("Error enviando datos");
+console.error(err);
+}
+
+limpiar();
 }
 
 /* =========================
