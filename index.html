@@ -15,17 +15,6 @@ margin:0;
 text-align:center;
 }
 
-.header{
-background:white;
-padding:10px 0;
-border-bottom:2px solid #0b3d91;
-}
-
-.header img{
-width:55%;
-max-width:200px;
-}
-
 .container{
 background:white;
 width:90%;
@@ -36,10 +25,7 @@ border-radius:18px;
 box-shadow:0 10px 25px rgba(0,0,0,.08);
 }
 
-h2{
-color:#0b3d91;
-margin-bottom:10px;
-}
+h2{ color:#0b3d91; }
 
 input,select{
 width:90%;
@@ -56,7 +42,6 @@ padding:13px;
 border:none;
 border-radius:12px;
 color:white;
-font-size:15px;
 cursor:pointer;
 margin-top:10px;
 }
@@ -77,15 +62,11 @@ font-weight:600;
 
 <body>
 
-<div class="header">
-<img src="https://i.imgur.com/OB279U8.jpeg">
-</div>
-
 <div class="container">
 
 <h2>Control de Acceso NIDO</h2>
 
-<div id="mensaje">Complete los datos</div>
+<div id="mensaje">Seleccione su rol</div>
 
 <select id="rol" onchange="mostrarCampos()">
 <option value="">Seleccione rol</option>
@@ -94,7 +75,9 @@ font-weight:600;
 <option value="PROVEEDOR">PROVEEDOR</option>
 </select>
 
-<div id="formulario" class="hidden">
+<div id="form" class="hidden">
+
+<input id="nombre" placeholder="Nombre completo">
 
 <select id="tipoDoc">
 <option value="">Tipo documento</option>
@@ -104,10 +87,9 @@ font-weight:600;
 <option value="PA">Pasaporte</option>
 </select>
 
-<input id="documento" placeholder="Documento">
-<input id="nombre" placeholder="Nombre completo">
+<input id="documento" placeholder="Número de documento">
 <input id="celular" placeholder="Celular">
-<input id="entidad" placeholder="Entidad">
+<input id="entidad" placeholder="Entidad a la que pertenece">
 <input id="contacto" placeholder="Contacto emergencia">
 <input id="parentesco" placeholder="Parentesco">
 <input id="destino" placeholder="Lugar de destino">
@@ -121,83 +103,103 @@ font-weight:600;
 
 <script>
 
-const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby85sS5KDcft0wkf82n_jr3RPRMDRNR7-RRd3vb6ouF/dev";
+const URL = "https://script.google.com/macros/s/AKfycby85sS5KDcft0wkf82n_jr3RPRMDRNR7-RRd3vb6ouF/dev";
 
-/* MOSTRAR CAMPOS */
+/* =========================
+   MOSTRAR CAMPOS CORREGIDO
+========================= */
 function mostrarCampos(){
-
-document.getElementById("formulario").classList.remove("hidden");
-document.getElementById("btnIngreso").classList.remove("hidden");
 
 const rol = document.getElementById("rol").value;
 
+const form = document.getElementById("form");
+const btnIngreso = document.getElementById("btnIngreso");
+const btnSalida = document.getElementById("btnSalida");
+
+if(!rol){
+form.classList.add("hidden");
+btnIngreso.classList.add("hidden");
+btnSalida.classList.add("hidden");
+return;
+}
+
+// mostrar formulario
+form.classList.remove("hidden");
+
+// siempre ingreso
+btnIngreso.classList.remove("hidden");
+
+// salida solo ciertos roles
 if(rol === "CONTRATISTA" || rol === "PROVEEDOR"){
-document.getElementById("btnSalida").classList.remove("hidden");
+btnSalida.classList.remove("hidden");
 }else{
-document.getElementById("btnSalida").classList.add("hidden");
+btnSalida.classList.add("hidden");
 }
 
 }
 
-/* OBTENER DATOS */
+/* =========================
+   DATOS
+========================= */
 function datos(){
-
 return {
 rol: document.getElementById("rol").value,
+nombre: document.getElementById("nombre").value,
 tipoDoc: document.getElementById("tipoDoc").value,
 documento: document.getElementById("documento").value,
-nombre: document.getElementById("nombre").value,
 celular: document.getElementById("celular").value,
 entidad: document.getElementById("entidad").value,
 contactoEmergencia: document.getElementById("contacto").value,
 parentesco: document.getElementById("parentesco").value,
 destino: document.getElementById("destino").value
 };
-
 }
 
-/* INGRESO */
+/* =========================
+   INGRESO
+========================= */
 async function enviarIngreso(){
-
-const d = datos();
 
 await fetch(URL,{
 method:"POST",
 headers:{
-  "Content-Type":"application/json"
+"Content-Type":"application/json"
 },
-body: JSON.stringify(d)
+body:JSON.stringify(datos())
 });
 
 alert("Ingreso registrado");
-}
-/* SALIDA */
-async function enviarSalida(){
-
-const d = datos();
-
-await fetch(URL,{
-method:"POST",
-headers:{
-  "Content-Type":"application/json"
-},
-body: JSON.stringify(d)
-});
-
-alert("Salida registrada");
-}
-
 limpiar();
 
 }
 
-/* LIMPIAR */
+/* =========================
+   SALIDA
+========================= */
+async function enviarSalida(){
+
+await fetch(URL,{
+method:"POST",
+headers:{
+"Content-Type":"application/json"
+},
+body:JSON.stringify(datos())
+});
+
+alert("Salida registrada");
+limpiar();
+
+}
+
+/* =========================
+   LIMPIAR
+========================= */
 function limpiar(){
 
 document.querySelectorAll("input").forEach(i=>i.value="");
 document.getElementById("tipoDoc").value="";
 document.getElementById("rol").value="";
-document.getElementById("formulario").classList.add("hidden");
+document.getElementById("form").classList.add("hidden");
 document.getElementById("btnIngreso").classList.add("hidden");
 document.getElementById("btnSalida").classList.add("hidden");
 
