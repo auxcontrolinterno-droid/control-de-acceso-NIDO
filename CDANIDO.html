@@ -1,0 +1,220 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="UTF-8">
+<title>Control de Acceso</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
+
+<style>
+body{
+font-family:'Inter',sans-serif;
+background:linear-gradient(135deg,#e9eef5,#dfe7f1);
+margin:0;
+text-align:center;
+}
+
+.header{
+background:white;
+padding:10px 0;
+border-bottom:2px solid #0b3d91;
+box-shadow:0 2px 6px rgba(0,0,0,.05);
+}
+
+.header img{
+width:55%;
+max-width:200px;
+}
+
+.container{
+background:white;
+width:90%;
+max-width:380px;
+margin:30px auto;
+padding:25px;
+border-radius:18px;
+box-shadow:0 10px 25px rgba(0,0,0,.08);
+}
+
+h2{
+color:#0b3d91;
+}
+
+input,select{
+width:85%;
+padding:12px;
+margin:8px 0;
+border-radius:10px;
+border:1px solid #ccc;
+}
+
+.btn{
+width:100%;
+padding:13px;
+border:none;
+border-radius:12px;
+color:white;
+font-size:15px;
+cursor:pointer;
+margin-top:10px;
+}
+
+.ingreso{ background:#0b3d91; }
+.salida{ background:#c62828; }
+
+.hidden{ display:none; }
+
+.mensaje{
+font-size:13px;
+margin:10px 0;
+color:#444;
+}
+</style>
+</head>
+
+<body>
+
+<div class="header">
+<img src="https://i.imgur.com/OB279U8.jpeg">
+</div>
+
+<div class="container">
+
+<h2>Control de Acceso</h2>
+
+<div class="mensaje" id="mensaje">Registre su ingreso/salida</div>
+
+<select id="rolSelect" onchange="cambiarVista()">
+<option value="">Defina su rol</option>
+<option value="VISITANTE">VISITANTE</option>
+<option value="CONTRATISTA">CONTRATISTA</option>
+<option value="PROVEEDOR">PROVEEDOR</option>
+</select>
+
+<div id="zonaCedula" class="hidden">
+<select id="tipoDocInput">
+<option value="">Tipo de documento</option>
+<option value="CC">Cédula</option>
+<option value="TI">Tarjeta Identidad</option>
+<option value="CE">Extranjería</option>
+<option value="PA">Pasaporte</option>
+</select>
+
+<input id="docInput" placeholder="Número documento">
+</div>
+
+<button class="btn ingreso hidden" id="btnIngreso" onclick="irIngreso()">Ingreso</button>
+<button class="btn salida hidden" id="btnSalida" onclick="irSalida()">Salida</button>
+
+</div>
+
+<script>
+
+const SCRIPT_URL = "https://script.google.com/macros/s/AKfycby85sS5KDcft0wkf82n_jr3RPRMDRNR7-RRd3vb6ouF/dev";
+
+let data = [];
+
+/* UI */
+function cambiarVista(){
+
+document.getElementById("zonaCedula").classList.remove("hidden");
+document.getElementById("btnIngreso").classList.remove("hidden");
+
+const rol = document.getElementById("rolSelect").value;
+
+if(rol === "CONTRATISTA" || rol === "PROVEEDOR"){
+document.getElementById("btnSalida").classList.remove("hidden");
+}else{
+document.getElementById("btnSalida").classList.add("hidden");
+}
+
+}
+
+/* USUARIO (simple local) */
+function getUser(){
+return {
+nombre: "",
+contacto: "",
+entidad: "",
+emergencia: "",
+parentesco: "",
+rol: document.getElementById("rolSelect").value
+};
+}
+
+/* INGRESO */
+async function irIngreso(){
+
+const doc = document.getElementById("docInput").value.trim();
+const rol = document.getElementById("rolSelect").value;
+const tipoDoc = document.getElementById("tipoDocInput").value;
+
+if(!doc || !rol || !tipoDoc){
+alert("Complete todos los campos");
+return;
+}
+
+await fetch(SCRIPT_URL, {
+method: "POST",
+body: JSON.stringify({
+tipoRegistro: "INGRESO",
+rol: rol,
+nombre: "",
+tipoDoc: tipoDoc,
+documento: doc,
+celular: "",
+entidad: "",
+contactoEmergencia: "",
+parentesco: "",
+destino: "INGRESO"
+})
+});
+
+document.getElementById("mensaje").innerText =
+"✅ Ingreso registrado correctamente";
+
+document.getElementById("docInput").value = "";
+
+}
+
+/* SALIDA */
+async function irSalida(){
+
+const doc = document.getElementById("docInput").value.trim();
+const tipoDoc = document.getElementById("tipoDocInput").value;
+const rol = document.getElementById("rolSelect").value;
+
+if(!doc || !tipoDoc){
+alert("Complete los campos");
+return;
+}
+
+await fetch(SCRIPT_URL, {
+method: "POST",
+body: JSON.stringify({
+tipoRegistro: "SALIDA",
+rol: rol,
+nombre: "",
+tipoDoc: tipoDoc,
+documento: doc,
+celular: "",
+entidad: "",
+contactoEmergencia: "",
+parentesco: "",
+destino: "SALIDA"
+})
+});
+
+document.getElementById("mensaje").innerText =
+"✅ Salida registrada correctamente";
+
+document.getElementById("docInput").value = "";
+document.getElementById("tipoDocInput").value = "";
+
+}
+
+</script>
+
+</body>
+</html>
